@@ -1,6 +1,6 @@
-import { Link } from "react-router";
-import React, { useEffect, useState } from "react";
-import Button from "@mui/material/Button";
+import Header from "../components/Header";
+import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,82 +8,104 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import { getCart  ,deleteItemFromCart} from "../utils/cart";
+import Button from "@mui/material/Button";
+import { Link } from "react-router";
+import { useState, useEffect } from "react";
+import { getCart, updateCart } from "../utils/cart";
 
+const CartPage = () => {
+  // load the cart items from the local storage
+  const [cart, setCart] = useState(getCart());
 
-export default function Cart() {
-  const [cart, setCart] = useState([]);
-
-  useEffect(() => {
-    setCart(getCart());
-  }, []);
-
-  const removeFromCart = (_id) => {
-    deleteItemFromCart(_id)
-    setCart(getCart); 
-    
+  const getCartTotal = () => {
+    let total = 0;
+    cart.forEach((product) => {
+      total += product.quantity * product.price;
+    });
+    return total;
   };
 
-  
-
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const removeItemFromCart = (product) => {
+    // 1. remove product from cart
+    const updatedCart = cart.filter((item) => item._id !== product._id);
+    // 2. update the cart data in local storage and the state
+    updateCart(updatedCart);
+    // 3. update the state
+    setCart(updatedCart);
+  };
 
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>Cart</Typography>
-      <Box>
-        <Button variant="contained" component={Link} to="/">Home</Button>
-        <Button variant="outlined" component={Link} to="/cart">Cart</Button>
-      </Box>
-      <TableContainer component={Paper}>
-        <Table> 
-          <TableHead>
-            <TableRow>
-              <TableCell>Product</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>Quantity</TableCell>
-              <TableCell>Total</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {cart.length === 0 ? (
+    <>
+      <Header current="cart" title="Cart" />
+      <Container maxWidth="lg" sx={{ textAlign: "center" }}>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No Product Add Yet!
-                </TableCell>
+                <TableCell>Product</TableCell>
+                <TableCell align="right">Price</TableCell>
+                <TableCell align="right">Quantity</TableCell>
+                <TableCell align="right">Total</TableCell>
+                <TableCell align="right">Action</TableCell>
               </TableRow>
-            ) : (
-              cart.map((item) => (
-                <TableRow key={item._id}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>${item.price}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>${(item.price * item.quantity)}</TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="contained" 
-                      color="error" 
-                      onClick={() => removeFromCart(item._id)}
-                    >
-                      Remove
-                    </Button>
+            </TableHead>
+            <TableBody>
+              {cart.length > 0 ? (
+                cart.map((product) => (
+                  <TableRow
+                    key={product._id}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {product.name}
+                    </TableCell>
+                    <TableCell align="right">{product.price}</TableCell>
+                    <TableCell align="right">{product.quantity}</TableCell>
+                    <TableCell align="right">
+                      ${(product.price * product.quantity).toFixed(2)}
+                    </TableCell>
+                    <TableCell align="right">
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                          removeItemFromCart(product);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    No product has been added to cart yet
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Typography variant="h6" sx={{ mt: 2 }}>
-        Total: ${total.toFixed(2)}
-      </Typography>
-      <Box>
-      <Button variant="outlined" component={Link} to="/">Checkout</Button>
-      </Box>
-    </div>
+              )}
+              <TableRow>
+                <TableCell colSpan={3}></TableCell>
+                <TableCell align="right">${getCartTotal()}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Box sx={{ pt: 3, display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="contained"
+            color="primary"
+            component={Link}
+            to="/checkout"
+            // disable the checkout page if no item found in cart
+            disabled={cart.length === 0 ? true : false}
+          >
+            Checkout
+          </Button>
+        </Box>
+      </Container>
+    </>
   );
-}
+};
+
+export default CartPage;

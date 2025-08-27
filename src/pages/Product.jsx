@@ -29,20 +29,32 @@ export default function Product() {
   }, [category, page]);
 
    const handleProductCart =(product) => {
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-  let existing = cart.find((item) => item._id === product._id);
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.push({ ...product, quantity: 1 });
-  }
-
-  localStorage.setItem("cart", JSON.stringify(cart));
-
-  toast.success("Product Added To Cart");
-};
-
+      // 1. get current cart data from local storage
+    const cartInLocalStorage = localStorage.getItem("cart");
+    const cartData = cartInLocalStorage ? JSON.parse(cartInLocalStorage) : [];
+    // 2. find out if the product already exists in the cart or not
+    const selected = cartData.find((item) => item._id === product._id);
+    if (selected) {
+      // 3. if product already exists, just increase the quantity
+      selected.quantity += 1; // plus one
+    } else {
+      // 4. if not exist, add the product to cart
+      // long method
+      // const selectedProduct = { ...product }
+      // selectedProduct.quantity = 1;
+      // cartData.push(selectedProduct);
+      // short method
+      cartData.push({
+        ...product,
+        quantity: 1,
+      });
+    }
+    // 5. update the cart (in local storage) with the latest data
+    localStorage.setItem("cart", JSON.stringify(cartData));
+    // 6. display the notification
+    toast.success(`"${product.name}" has been added to cart`);
+  };
+  
    const handleProductDelete = async (id) => {
     Swal.fire({
       title: "Are you sure you want to delete this product?",
