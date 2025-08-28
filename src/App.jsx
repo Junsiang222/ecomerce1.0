@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router"
-import { Toaster, toast } from 'sonner';
+import { Toaster } from 'sonner';
+
 import Product from "./pages/Product";
 import ProductAdd from "./pages/ProductAdd";
 import ProductEdit from "./pages/ProductEdit";
@@ -7,6 +8,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import PaymentVerify from "./pages/PaymentVerify";
 import OrdersPage from "./pages/OrdersPage";
+import CategoriesPage from "./pages/CategoriesPage";
 function App() {
   return (
       <BrowserRouter>
@@ -18,6 +20,7 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/verify-payment" element={< PaymentVerify/>} />
           <Route path="/orders" element={< OrdersPage/>} />
+          <Route path="/category" element={< CategoriesPage/>} />
         </Routes>
         <Toaster/>
       </BrowserRouter>
